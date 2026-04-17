@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling<1.22"]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,7 +7,7 @@ name = "paybridge-np"
 version = "0.1.0"
 description = "Official Python SDK for the PayBridgeNP payment gateway - accept eSewa, Khalti, and ConnectIPS through a single API"
 readme = "README.md"
-license = "MIT"
+license = {text = "MIT"}
 requires-python = ">=3.9"
 authors = [{ name = "PayBridgeNP", email = "support@paybridgenp.com" }]
 keywords = [
