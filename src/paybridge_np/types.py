@@ -10,7 +10,7 @@ from typing import Any, Literal, TypedDict
 
 # ── Common ───────────────────────────────────────────────────────────────────
 
-Provider = Literal["esewa", "khalti", "connectips", "hamropay", "imepay"]
+Provider = Literal["esewa", "khalti", "connectips", "hamropay"]
 PaymentStatus = Literal["pending", "processing", "success", "failed", "cancelled", "refunded"]
 Metadata = dict[str, Any]
 
@@ -154,6 +154,14 @@ class CreateSubscriptionParams(TypedDict, total=False):
     planId: str  # Required
     referenceId: str
     startDate: str
+    # Trial override. trialEndsAt (ISO 8601) wins over trialDays (0-365)
+    # wins over the plan default. Both omitted = use plan's trialDays.
+    trialDays: int
+    trialEndsAt: str
+    # Per-seat multiplier (default 1, only for per_unit plans).
+    quantity: int
+    # Pin period-end to this calendar day (1-28) for month/quarter/year intervals.
+    billingAnchorDay: int | None
     metadata: Metadata | None
 
 
@@ -170,6 +178,65 @@ class CancelSubscriptionParams(TypedDict, total=False):
 class ChangePlanParams(TypedDict, total=False):
     newPlanId: str  # Required
     effectiveAt: str
+
+
+class ExtendTrialParams(TypedDict, total=False):
+    trialEndsAt: str  # Required, ISO 8601 — must be after current trial end
+
+
+# ── Coupons + Promotion Codes (Phase 2) ─────────────────────────────────────
+
+CouponDiscountType = Literal["percent", "amount"]
+CouponDuration = Literal["once", "repeating", "forever"]
+
+
+class CreateCouponParams(TypedDict, total=False):
+    code: str  # Required
+    name: str  # Required
+    discountType: CouponDiscountType  # Required
+    duration: CouponDuration  # Required
+    percentOff: int  # 1..100 when discountType='percent'
+    amountOff: int  # paisa when discountType='amount'
+    currency: str
+    durationInCycles: int  # Required when duration='repeating'
+    maxRedemptions: int
+    redeemBy: str  # ISO 8601
+    appliesToPlanIds: list[str]
+    projectIds: list[str]
+    metadata: Metadata | None
+
+
+class CreatePromotionCodeParams(TypedDict, total=False):
+    couponId: str  # Required
+    code: str  # Required, case-insensitive (auto-uppercased)
+    maxRedemptions: int
+    expiresAt: str  # ISO 8601
+    firstTimeTransaction: bool
+    minimumAmount: int  # paisa
+    customerIds: list[str]
+    metadata: Metadata | None
+
+
+class ValidatePromotionCodeParams(TypedDict, total=False):
+    code: str  # Required
+    customerId: str
+    planId: str
+    amount: int  # paisa, for minimumAmount check
+
+
+class ApplyCouponParams(TypedDict, total=False):
+    couponId: str
+    promotionCode: str
+
+
+# ── Tax (Phase 2) ───────────────────────────────────────────────────────────
+
+
+class UpdateTaxSettingsParams(TypedDict, total=False):
+    enabled: bool
+    rateBps: int  # 1300 = 13.00%
+    registrationNumber: str | None
+    label: str | None
 
 
 # ── Invoices ─────────────────────────────────────────────────────────────────
