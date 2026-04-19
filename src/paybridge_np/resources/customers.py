@@ -46,3 +46,14 @@ class CustomersResource:
     def delete(self, customer_id: str) -> dict[str, Any]:
         """Delete a customer. Returns ``{"deleted": true}``."""
         return self._http.delete(f"/v1/billing/customers/{customer_id}")
+
+    def add_credit(self, customer_id: str, amount: int, note: str | None = None) -> dict[str, Any]:
+        """Add credits to a customer's balance (use negative amount to deduct).
+
+        Credits are applied automatically against future invoices before payment.
+        ``amount`` is in paisa (NPR × 100).
+        """
+        body: dict[str, Any] = {"amount": amount}
+        if note is not None:
+            body["note"] = note
+        return self._http.post(f"/v1/billing/customers/{customer_id}/credit", json=body)

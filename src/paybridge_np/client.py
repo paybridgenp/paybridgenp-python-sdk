@@ -11,6 +11,9 @@ from .resources.plans import PlansResource
 from .resources.customers import CustomersResource
 from .resources.subscriptions import SubscriptionsResource
 from .resources.invoices import InvoicesResource
+from .resources.coupons import CouponsResource
+from .resources.promotion_codes import PromotionCodesResource
+from .resources.dunning import DunningResource
 
 
 class PayBridge:
@@ -52,6 +55,9 @@ class PayBridge:
         self._customers: CustomersResource | None = None
         self._subscriptions: SubscriptionsResource | None = None
         self._invoices: InvoicesResource | None = None
+        self._coupons: CouponsResource | None = None
+        self._promotion_codes: PromotionCodesResource | None = None
+        self._dunning: DunningResource | None = None
 
     @property
     def checkout(self) -> CheckoutResource:
@@ -100,6 +106,24 @@ class PayBridge:
         if self._invoices is None:
             self._invoices = InvoicesResource(self._http)
         return self._invoices
+
+    @property
+    def coupons(self) -> CouponsResource:
+        if self._coupons is None:
+            self._coupons = CouponsResource(self._http)
+        return self._coupons
+
+    @property
+    def promotion_codes(self) -> PromotionCodesResource:
+        if self._promotion_codes is None:
+            self._promotion_codes = PromotionCodesResource(self._http)
+        return self._promotion_codes
+
+    @property
+    def dunning(self) -> DunningResource:
+        if self._dunning is None:
+            self._dunning = DunningResource(self._http)
+        return self._dunning
 
     def close(self) -> None:
         """Close the underlying HTTP client."""

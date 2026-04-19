@@ -8,6 +8,7 @@ from .plans import PlansResource
 from .customers import CustomersResource
 from .subscriptions import SubscriptionsResource
 from .invoices import InvoicesResource
+from .dunning import DunningResource
 
 __all__ = [
     "CheckoutResource",
@@ -18,4 +19,5 @@ __all__ = [
     "CustomersResource",
     "SubscriptionsResource",
     "InvoicesResource",
+    "DunningResource",
 ]
