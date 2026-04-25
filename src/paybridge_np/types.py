@@ -10,8 +10,9 @@ from typing import Any, Literal, TypedDict
 
 # ── Common ───────────────────────────────────────────────────────────────────
 
-Provider = Literal["esewa", "khalti", "connectips", "hamropay"]
+Provider = Literal["esewa", "khalti", "connectips", "hamropay", "fonepay"]
 PaymentStatus = Literal["pending", "processing", "success", "failed", "cancelled", "refunded"]
+CheckoutFlow = Literal["hosted", "redirect"]
 Metadata = dict[str, Any]
 
 # ── Checkout ─────────────────────────────────────────────────────────────────
@@ -26,7 +27,15 @@ class CustomerInfo(TypedDict, total=False):
 class CreateCheckoutParams(TypedDict, total=False):
     amount: int  # Required -- in paisa (NPR x 100)
     provider: Provider
+    # "hosted" (default) renders the PayBridge picker; if `provider` is set,
+    # that option is pre-selected but the customer can still switch.
+    # "redirect" skips the picker and 302s to the chosen provider --
+    # `provider` is required when `flow` is "redirect".
+    flow: CheckoutFlow
     returnUrl: str  # Required
+    # Optional -- when omitted, cancellations fall back to
+    # ``returnUrl?status=cancelled`` and the hosted picker hides its
+    # Cancel link.
     cancelUrl: str
     currency: str
     metadata: Metadata
@@ -37,6 +46,8 @@ class CreateCheckoutParams(TypedDict, total=False):
 class CheckoutSession(TypedDict):
     id: str
     checkout_url: str
+    flow: CheckoutFlow
+    provider: Provider | None
     expires_at: str
 
 
