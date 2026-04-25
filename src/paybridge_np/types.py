@@ -31,6 +31,7 @@ class CreateCheckoutParams(TypedDict, total=False):
     currency: str
     metadata: Metadata
     customer: CustomerInfo
+    collectAddress: bool
 
 
 class CheckoutSession(TypedDict):
@@ -78,7 +79,7 @@ class CreateRefundParams(TypedDict, total=False):
 
 # ── Webhooks ─────────────────────────────────────────────────────────────────
 
-WebhookEventType = Literal["payment.succeeded", "payment.failed", "payment.cancelled"]
+WebhookEventType = Literal["payment.succeeded", "payment.failed", "payment.cancelled", "payment.refunded", "payment_link.paid"]
 
 
 class CreateWebhookParams(TypedDict, total=False):
