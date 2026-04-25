@@ -14,6 +14,7 @@ from .resources.invoices import InvoicesResource
 from .resources.coupons import CouponsResource
 from .resources.promotion_codes import PromotionCodesResource
 from .resources.dunning import DunningResource
+from .resources.qr import QrResource
 
 
 class PayBridge:
@@ -58,6 +59,7 @@ class PayBridge:
         self._coupons: CouponsResource | None = None
         self._promotion_codes: PromotionCodesResource | None = None
         self._dunning: DunningResource | None = None
+        self._qr: QrResource | None = None
 
     @property
     def checkout(self) -> CheckoutResource:
@@ -124,6 +126,13 @@ class PayBridge:
         if self._dunning is None:
             self._dunning = DunningResource(self._http)
         return self._dunning
+
+    @property
+    def qr(self) -> QrResource:
+        """Direct-QR API for Fonepay (Premium feature)."""
+        if self._qr is None:
+            self._qr = QrResource(self._http)
+        return self._qr
 
     def close(self) -> None:
         """Close the underlying HTTP client."""
