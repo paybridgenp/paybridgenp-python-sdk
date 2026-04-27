@@ -18,10 +18,20 @@ Metadata = dict[str, Any]
 # ── Checkout ─────────────────────────────────────────────────────────────────
 
 
+class CustomerAddress(TypedDict, total=False):
+    line1: str       # required
+    line2: str
+    city: str        # required
+    state: str
+    postalCode: str
+    country: str
+
+
 class CustomerInfo(TypedDict, total=False):
     name: str
     email: str
     phone: str
+    address: CustomerAddress
 
 
 class CreateCheckoutParams(TypedDict, total=False):
