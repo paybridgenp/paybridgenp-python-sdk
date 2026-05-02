@@ -1,5 +1,9 @@
 [build-system]
-requires = ["hatchling<1.22"]
+# hatchling >=1.27 emits Metadata 2.4, which PEP 639 / current PyPI requires
+# for any project that includes license-file (we ship LICENSE). Older
+# pinned `<1.22` builds still upload-fine for older versions but PyPI now
+# rejects metadata 2.1 + license-file as inconsistent.
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
