@@ -55,6 +55,7 @@ class CreateCheckoutParams(TypedDict, total=False):
 
 class CheckoutSession(TypedDict):
     id: str
+    livemode: bool  # True for sk_live_ keys, False for sk_test_ keys
     checkout_url: str
     flow: CheckoutFlow
     provider: Provider | None
@@ -84,6 +85,7 @@ class ExpiredCheckoutSession(TypedDict):
 
 class Payment(TypedDict):
     id: str
+    livemode: bool  # True for sk_live_ keys, False for sk_test_ keys
     project_id: str
     checkout_session_id: str | None
     amount: int
@@ -130,6 +132,20 @@ class UpdateWebhookParams(TypedDict, total=False):
     url: str
     events: list[WebhookEventType]
     enabled: bool
+
+
+class WebhookEvent(TypedDict):
+    """Shape of the JSON body PayBridgeNP POSTs to your webhook endpoint.
+
+    ``livemode`` reflects the project mode: ``True`` for events fired by a
+    live (``sk_live_``) key, ``False`` for sandbox.
+    """
+
+    id: str
+    type: WebhookEventType
+    created: int
+    livemode: bool
+    data: dict[str, Any]
 
 
 # ── Plans ────────────────────────────────────────────────────────────────────

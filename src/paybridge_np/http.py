@@ -8,7 +8,7 @@ from typing import Any
 
 import httpx
 
-from .errors import PayBridgeError, ConnectionError, create_error
+from .errors import ConnectionError, parse_error_response
 
 DEFAULT_BASE_URL = "https://api.paybridgenp.com"
 DEFAULT_TIMEOUT = 30.0
@@ -39,7 +39,7 @@ class HttpClient:
             headers={
                 "Authorization": f"Bearer {self._api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": "PayBridgeNP-Python/0.1.0",
+                "User-Agent": "PayBridgeNP-Python/1.0.0",
             },
         )
 
@@ -68,10 +68,12 @@ class HttpClient:
             try:
                 raw = resp.json()
             except Exception:
+                # Body wasn't JSON. Will surface as `HTTP <status>` with no detail.
                 pass
 
-            message = raw.get("error", f"HTTP {resp.status_code}") if raw and isinstance(raw.get("error"), str) else f"HTTP {resp.status_code}"
-            raise create_error(message, resp.status_code, raw)
+            raise parse_error_response(
+                resp.status_code, raw, resp.headers.get("Retry-After")
+            )
 
     def get(self, path: str) -> Any:
         return self.request("GET", path)
