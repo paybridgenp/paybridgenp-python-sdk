@@ -11,7 +11,7 @@ from .errors import (
     SignatureVerificationError,
 )
 
-SDK_VERSION = "0.4.0"
+SDK_VERSION = "0.6.0"
 
 __all__ = [
     "PayBridge",

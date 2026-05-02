@@ -61,6 +61,24 @@ class CheckoutSession(TypedDict):
     expires_at: str
 
 
+CheckoutSessionStatus = Literal[
+    "pending", "initiated", "success", "failed", "cancelled", "expired"
+]
+
+
+class ExpiredCheckoutSession(TypedDict):
+    """Returned by ``client.checkout.expire(id)``. Same identifying fields as
+    :class:`CheckoutSession` minus ``checkout_url`` (the session is no longer
+    payable), plus a ``status`` field reflecting the current row state.
+    """
+
+    id: str
+    status: CheckoutSessionStatus
+    flow: CheckoutFlow
+    provider: Provider | None
+    expires_at: str
+
+
 # ── Payments ─────────────────────────────────────────────────────────────────
 
 
