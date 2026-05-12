@@ -1,6 +1,6 @@
 # paybridge-np
 
-Official Python SDK for the [PayBridgeNP](https://paybridgenp.com) payment gateway. Accept eSewa, Khalti, and ConnectIPS through a single API.
+Official Python SDK for the [PayBridgeNP](https://paybridgenp.com) payment gateway. Accept eSewa, Khalti, and Fonepay through a single API.
 
 ## Installation
 
