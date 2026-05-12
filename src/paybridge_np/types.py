@@ -10,7 +10,7 @@ from typing import Any, Literal, TypedDict
 
 # ── Common ───────────────────────────────────────────────────────────────────
 
-Provider = Literal["esewa", "khalti", "connectips", "hamropay", "fonepay"]
+Provider = Literal["esewa", "khalti", "fonepay"]
 PaymentStatus = Literal["pending", "processing", "success", "failed", "cancelled", "refunded"]
 CheckoutFlow = Literal["hosted", "redirect"]
 Metadata = dict[str, Any]
