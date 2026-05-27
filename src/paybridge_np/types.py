@@ -37,7 +37,7 @@ class CustomerInfo(TypedDict, total=False):
 class CreateCheckoutParams(TypedDict, total=False):
     amount: int  # Required -- in paisa (NPR x 100)
     provider: Provider
-    # "hosted" (default) renders the PayBridge picker; if `provider` is set,
+    # "hosted" (default) renders the PayBridgeNP picker; if `provider` is set,
     # that option is pre-selected but the customer can still switch.
     # "redirect" skips the picker and 302s to the chosen provider --
     # `provider` is required when `flow` is "redirect".

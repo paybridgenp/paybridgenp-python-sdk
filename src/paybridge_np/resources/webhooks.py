@@ -76,7 +76,7 @@ class WebhooksResource:
 
         Args:
             body: Raw request body string (do NOT parse as JSON first).
-            signature: Value of the ``X-PayBridge-Signature`` header.
+            signature: Value of the ``X-PayBridgeNP-Signature`` header.
             secret: Your webhook signing secret (``whsec_...``).
 
         Returns:
@@ -86,7 +86,7 @@ class WebhooksResource:
             SignatureVerificationError: If the signature is missing, malformed, or invalid.
         """
         if not signature:
-            raise SignatureVerificationError("Missing X-PayBridge-Signature header")
+            raise SignatureVerificationError("Missing X-PayBridgeNP-Signature header")
 
         parts: dict[str, str] = {}
         for part in signature.split(","):
