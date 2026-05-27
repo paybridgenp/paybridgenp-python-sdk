@@ -1,6 +1,6 @@
 """Official Python SDK for the PayBridgeNP payment gateway."""
 
-from .client import PayBridge
+from .client import PayBridgeNP
 from .errors import (
     PayBridgeError,
     AuthenticationError,
@@ -19,7 +19,7 @@ from .errors import (
 SDK_VERSION = "1.0.0"
 
 __all__ = [
-    "PayBridge",
+    "PayBridgeNP",
     "PayBridgeError",
     "AuthenticationError",
     "AccountError",

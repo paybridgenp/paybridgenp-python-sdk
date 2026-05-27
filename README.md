@@ -11,9 +11,9 @@ pip install paybridge-np
 ## Quick start
 
 ```python
-from paybridge_np import PayBridge
+from paybridge_np import PayBridgeNP
 
-client = PayBridge(api_key="sk_live_...")  # from dashboard.paybridgenp.com
+client = PayBridgeNP(api_key="sk_live_...")  # from dashboard.paybridgenp.com
 
 # Create a checkout session
 session = client.checkout.create({
@@ -72,7 +72,7 @@ from paybridge_np.resources.webhooks import WebhooksResource
 
 event = WebhooksResource.construct_event(
     body=raw_body,
-    signature=request.headers["X-PayBridge-Signature"],
+    signature=request.headers["X-PayBridgeNP-Signature"],
     secret="whsec_...",
 )
 ```
@@ -123,7 +123,7 @@ except PayBridgeError as e:
 ## Context manager
 
 ```python
-with PayBridge(api_key="sk_live_...") as client:
+with PayBridgeNP(api_key="sk_live_...") as client:
     session = client.checkout.create({...})
 # HTTP client is closed automatically
 ```

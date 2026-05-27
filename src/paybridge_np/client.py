@@ -1,4 +1,4 @@
-"""Main PayBridge client."""
+"""Main PayBridgeNP client."""
 
 from __future__ import annotations
 
@@ -17,14 +17,14 @@ from .resources.dunning import DunningResource
 from .resources.qr import QrResource
 
 
-class PayBridge:
+class PayBridgeNP:
     """PayBridgeNP API client.
 
     Usage::
 
-        from paybridge_np import PayBridge
+        from paybridge_np import PayBridgeNP
 
-        client = PayBridge(api_key="sk_live_...")
+        client = PayBridgeNP(api_key="sk_live_...")
         session = client.checkout.create({
             "amount": 250000,
             "returnUrl": "https://mystore.com/success",
@@ -138,7 +138,7 @@ class PayBridge:
         """Close the underlying HTTP client."""
         self._http.close()
 
-    def __enter__(self) -> PayBridge:
+    def __enter__(self) -> PayBridgeNP:
         return self
 
     def __exit__(self, *args: object) -> None:

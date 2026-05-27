@@ -1,6 +1,6 @@
 """Tests for client initialization and resource access."""
 
-from paybridge_np import PayBridge
+from paybridge_np import PayBridgeNP
 from paybridge_np.resources.checkout import CheckoutResource
 from paybridge_np.resources.payments import PaymentsResource
 from paybridge_np.resources.refunds import RefundsResource
@@ -12,7 +12,7 @@ from paybridge_np.resources.invoices import InvoicesResource
 
 
 def test_client_resources():
-    client = PayBridge(api_key="sk_test_xxx")
+    client = PayBridgeNP(api_key="sk_test_xxx")
     assert isinstance(client.checkout, CheckoutResource)
     assert isinstance(client.payments, PaymentsResource)
     assert isinstance(client.refunds, RefundsResource)
@@ -25,7 +25,7 @@ def test_client_resources():
 
 
 def test_lazy_initialization():
-    client = PayBridge(api_key="sk_test_xxx")
+    client = PayBridgeNP(api_key="sk_test_xxx")
     # Access twice, should return the same instance
     checkout1 = client.checkout
     checkout2 = client.checkout
@@ -34,9 +34,9 @@ def test_lazy_initialization():
 
 
 def test_context_manager():
-    with PayBridge(api_key="sk_test_xxx") as client:
+    with PayBridgeNP(api_key="sk_test_xxx") as client:
         assert isinstance(client.checkout, CheckoutResource)
 
 
 def test_static_webhook_utility():
-    assert isinstance(PayBridge.webhooks_static, WebhooksResource)
+    assert isinstance(PayBridgeNP.webhooks_static, WebhooksResource)
