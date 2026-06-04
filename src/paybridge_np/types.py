@@ -202,7 +202,9 @@ class UpdateCustomerParams(TypedDict, total=False):
 
 # ── Subscriptions ────────────────────────────────────────────────────────────
 
-SubscriptionStatus = Literal["active", "past_due", "paused", "cancelled", "completed"]
+SubscriptionStatus = Literal[
+    "incomplete", "incomplete_expired", "active", "past_due", "paused", "cancelled", "completed"
+]
 
 
 class CreateSubscriptionParams(TypedDict, total=False):
