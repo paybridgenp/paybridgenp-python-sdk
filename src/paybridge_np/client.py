@@ -14,6 +14,7 @@ from .resources.invoices import InvoicesResource
 from .resources.coupons import CouponsResource
 from .resources.promotion_codes import PromotionCodesResource
 from .resources.dunning import DunningResource
+from .resources.tax import TaxResource
 from .resources.qr import QrResource
 
 
@@ -59,6 +60,7 @@ class PayBridgeNP:
         self._coupons: CouponsResource | None = None
         self._promotion_codes: PromotionCodesResource | None = None
         self._dunning: DunningResource | None = None
+        self._tax: TaxResource | None = None
         self._qr: QrResource | None = None
 
     @property
@@ -126,6 +128,12 @@ class PayBridgeNP:
         if self._dunning is None:
             self._dunning = DunningResource(self._http)
         return self._dunning
+
+    @property
+    def tax(self) -> TaxResource:
+        if self._tax is None:
+            self._tax = TaxResource(self._http)
+        return self._tax
 
     @property
     def qr(self) -> QrResource:
