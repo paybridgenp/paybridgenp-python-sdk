@@ -35,6 +35,11 @@ session = client.checkout.create({
 # Expire a previously-created session so its URL stops being payable
 # (use when you mint a fresh session for the same purchase).
 client.checkout.expire("cs_xxx")
+
+# Retrieve or list checkout sessions (read-only). The read shape uses
+# camelCase keys (customerName, expiresAt, ...).
+session = client.checkout.retrieve("cs_xxx")
+sessions = client.checkout.list(limit=20, status="success")
 ```
 
 ## Payments
@@ -46,6 +51,40 @@ payments = result["data"]
 
 # Get a single payment
 payment = client.payments.retrieve("pay_xxx")
+```
+
+## Payment links
+
+Reusable hosted payment pages. Responses use camelCase keys.
+
+```python
+# Create
+link = client.payment_links.create({"title": "Donation", "amount": 50000})
+
+# List, retrieve (with view/conversion stats), update, cancel, or delete
+links = client.payment_links.list(active=True)
+detail = client.payment_links.retrieve(link["id"])
+client.payment_links.update(link["id"], {"active": False})
+client.payment_links.cancel(link["id"])  # deactivate, keep for records
+client.payment_links.delete(link["id"])  # only if never used
+```
+
+## Direct-QR (Fonepay)
+
+Premium feature -- mint a Fonepay QR server-side and embed it in your own UI,
+skipping the hosted checkout page. Subscribe to ``events_url`` (SSE) for
+``qr.scanned`` / ``qr.paid`` / ``qr.expired``.
+
+```python
+qr = client.qr.fonepay({
+    "amount": 10000,  # paisa
+    "customer": {"name": "Aarav Sharma", "email": "aarav@example.com"},
+})
+# qr["qr_image"] (PNG data URL), qr["qr_message"], qr["events_url"], qr["expires_at"]
+
+# The QR display window is ~3 min. Refresh it for the SAME session -- same id,
+# events_url, and webhook -- without spawning a new session. Lifetime unchanged.
+fresh = client.qr.refresh(qr["id"])
 ```
 
 ## Refunds

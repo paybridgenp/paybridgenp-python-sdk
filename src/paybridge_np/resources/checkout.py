@@ -46,3 +46,46 @@ class CheckoutResource:
             ExpiredCheckoutSession with ``status`` reflecting the current state.
         """
         return self._http.post(f"/v1/checkout/{quote(id, safe='')}/expire", json={})
+
+    def retrieve(self, id: str) -> dict[str, Any]:
+        """Retrieve a checkout session by ID.
+
+        Read-only -- sessions are created via :meth:`create`. Hits
+        ``GET /v1/sessions/{id}``.
+
+        Note: this richer read shape uses camelCase keys (``customerName``,
+        ``expiresAt``, ...), unlike the snake_case ``create`` response.
+
+        Args:
+            id: The checkout session id (e.g. ``cs_...``).
+
+        Returns:
+            dict with the session's status, amount, customer, and any
+            collected address.
+        """
+        return self._http.get(f"/v1/sessions/{quote(id, safe='')}")
+
+    def list(
+        self,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+        status: str | None = None,
+    ) -> dict[str, Any]:
+        """List checkout sessions for the project, newest first.
+
+        Optionally filter by ``status`` and page with ``limit``/``offset``.
+        Hits ``GET /v1/sessions``.
+
+        Returns:
+            dict ``{"data": [...], "meta": {"total", "limit", "offset"}}``.
+        """
+        qs_parts: dict[str, str] = {}
+        if limit is not None:
+            qs_parts["limit"] = str(limit)
+        if offset is not None:
+            qs_parts["offset"] = str(offset)
+        if status is not None:
+            qs_parts["status"] = status
+        qs = "&".join(f"{k}={quote(v, safe='')}" for k, v in qs_parts.items())
+        return self._http.get(f"/v1/sessions{'?' + qs if qs else ''}")

@@ -16,6 +16,7 @@ from .resources.promotion_codes import PromotionCodesResource
 from .resources.dunning import DunningResource
 from .resources.tax import TaxResource
 from .resources.qr import QrResource
+from .resources.payment_links import PaymentLinksResource
 
 
 class PayBridgeNP:
@@ -62,6 +63,7 @@ class PayBridgeNP:
         self._dunning: DunningResource | None = None
         self._tax: TaxResource | None = None
         self._qr: QrResource | None = None
+        self._payment_links: PaymentLinksResource | None = None
 
     @property
     def checkout(self) -> CheckoutResource:
@@ -141,6 +143,13 @@ class PayBridgeNP:
         if self._qr is None:
             self._qr = QrResource(self._http)
         return self._qr
+
+    @property
+    def payment_links(self) -> PaymentLinksResource:
+        """Reusable hosted payment pages (``/v1/payment-links``)."""
+        if self._payment_links is None:
+            self._payment_links = PaymentLinksResource(self._http)
+        return self._payment_links
 
     def close(self) -> None:
         """Close the underlying HTTP client."""

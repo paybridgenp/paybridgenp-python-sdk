@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any, TYPE_CHECKING
+from urllib.parse import quote
 
 if TYPE_CHECKING:
     from ..http import HttpClient
@@ -33,3 +34,24 @@ class QrResource:
             dict with id, qr_message, qr_image (data URL), events_url, expires_at.
         """
         return self._http.post("/v1/qr/fonepay", json=params)
+
+    def refresh(self, id: str) -> dict[str, Any]:
+        """Refresh a Direct-QR session: regenerate a fresh Fonepay QR for the
+        SAME session (same ``id``, ``events_url``, and webhook) without
+        spawning a new session.
+
+        The Fonepay QR display window is only ~3 minutes, and some wallets
+        (eSewa) reject a stale QR, so call this when ``qr.expired`` fires (or
+        proactively) to keep a scannable QR on screen. Takes no body -- the
+        amount and customer already live on the session. The session's overall
+        lifetime is unchanged. Hits ``POST /v1/qr/{id}/refresh``.
+
+        Premium feature -- the merchant must be on the Premium plan.
+
+        Args:
+            id: The Direct-QR session id (e.g. ``cs_...``).
+
+        Returns:
+            dict with id, qr_message, qr_image (data URL), events_url, expires_at.
+        """
+        return self._http.post(f"/v1/qr/{quote(id, safe='')}/refresh", json={})
