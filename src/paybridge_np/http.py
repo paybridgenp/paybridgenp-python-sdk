@@ -39,7 +39,7 @@ class HttpClient:
             headers={
                 "Authorization": f"Bearer {self._api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": "PayBridgeNP-Python/3.1.0",
+                "User-Agent": "PayBridgeNP-Python/3.2.0",
             },
         )
 
