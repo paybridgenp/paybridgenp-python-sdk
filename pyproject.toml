@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "paybridge-np"
-version = "3.2.0"
+version = "3.2.1"
 description = "Official Python SDK for the PayBridgeNP payment gateway - accept eSewa, Khalti, and Fonepay through a single API"
 readme = "README.md"
 license = {text = "MIT"}
@@ -50,3 +50,6 @@ packages = ["src/paybridge_np"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["test-billing.py"]

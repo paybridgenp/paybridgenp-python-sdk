@@ -16,7 +16,7 @@ from .errors import (
     parse_error_response,
 )
 
-SDK_VERSION = "3.2.0"
+SDK_VERSION = "3.2.1"
 
 __all__ = [
     "PayBridgeNP",
