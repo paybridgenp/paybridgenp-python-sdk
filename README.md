@@ -144,7 +144,7 @@ invoices = client.invoices.list(customer_id=customer["id"])
 
 ## Sandbox mode
 
-Use a sandbox API key (`sk_sandbox_...`) to test without real money. The SDK automatically routes to sandbox endpoints.
+Use a test-mode API key (`sk_test_...`) to test without real money. Mode is determined server-side by the key prefix (`sk_test_` vs `sk_live_`) - there is nothing to configure in the SDK.
 
 ## Error handling
 
