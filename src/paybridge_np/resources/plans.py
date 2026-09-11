@@ -13,9 +13,18 @@ class PlansResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: CreatePlanParams) -> dict[str, Any]:
-        """Create a billing plan."""
-        return self._http.post("/v1/billing/plans", json=params)
+    def create(
+        self,
+        params: CreatePlanParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Create a billing plan.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post("/v1/billing/plans", json=params, idempotency_key=idempotency_key)
 
     def list(
         self,
@@ -39,6 +48,19 @@ class PlansResource:
         """Retrieve a plan by ID."""
         return self._http.get(f"/v1/billing/plans/{plan_id}")
 
-    def update(self, plan_id: str, params: UpdatePlanParams) -> dict[str, Any]:
-        """Update a plan."""
-        return self._http.patch(f"/v1/billing/plans/{plan_id}", json=params)
+    def update(
+        self,
+        plan_id: str,
+        params: UpdatePlanParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Update a plan.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.patch(
+            f"/v1/billing/plans/{plan_id}", json=params,
+            idempotency_key=idempotency_key,
+        )

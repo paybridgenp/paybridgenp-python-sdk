@@ -20,14 +20,22 @@ class PaymentLinksResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: dict[str, Any]) -> dict[str, Any]:
+    def create(
+        self,
+        params: dict[str, Any],
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
         """Create a payment link.
 
         Provide either a fixed ``amount`` (paisa), or ``minAmount``/``maxAmount``
         bounds for a customer-entered amount. Returns the created link
         (HTTP 201).
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
-        return self._http.post("/v1/payment-links", json=params)
+        return self._http.post("/v1/payment-links", json=params, idempotency_key=idempotency_key)
 
     def list(
         self,
@@ -56,22 +64,48 @@ class PaymentLinksResource:
         """Retrieve a single link by ID, including aggregated view/conversion stats."""
         return self._http.get(f"/v1/payment-links/{quote(id, safe='')}")
 
-    def update(self, id: str, params: dict[str, Any]) -> dict[str, Any]:
-        """Update a link's editable fields. Only the keys you pass are changed."""
-        return self._http.patch(f"/v1/payment-links/{quote(id, safe='')}", json=params)
+    def update(
+        self,
+        id: str,
+        params: dict[str, Any],
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Update a link's editable fields. Only the keys you pass are changed.
 
-    def cancel(self, id: str) -> dict[str, Any]:
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.patch(
+            f"/v1/payment-links/{quote(id, safe='')}", json=params,
+            idempotency_key=idempotency_key,
+        )
+
+    def cancel(self, id: str, *, idempotency_key: str | None = None) -> dict[str, Any]:
         """Cancel (deactivate) a link so it can no longer accept payments, while
         keeping it and its history for your records. The recommended way to
-        retire a link that has already been used."""
-        return self._http.post(f"/v1/payment-links/{quote(id, safe='')}/cancel", json={})
+        retire a link that has already been used.
 
-    def delete(self, id: str) -> dict[str, Any]:
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post(
+            f"/v1/payment-links/{quote(id, safe='')}/cancel", json={},
+            idempotency_key=idempotency_key,
+        )
+
+    def delete(self, id: str, *, idempotency_key: str | None = None) -> dict[str, Any]:
         """Permanently delete a link. Only allowed when the link has never been
         used -- otherwise the API returns 422 and you should :meth:`cancel` it
         instead.
 
         Returns:
             dict ``{"deleted": True, "id": ...}``.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
-        return self._http.delete(f"/v1/payment-links/{quote(id, safe='')}")
+        return self._http.delete(
+            f"/v1/payment-links/{quote(id, safe='')}",
+            idempotency_key=idempotency_key,
+        )

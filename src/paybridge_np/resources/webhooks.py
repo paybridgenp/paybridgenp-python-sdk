@@ -29,12 +29,17 @@ class WebhooksResource:
         *,
         url: str,
         events: list[str] | None = None,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
-        """Register a webhook endpoint. Returns the endpoint with ``signing_secret``."""
+        """Register a webhook endpoint. Returns the endpoint with ``signing_secret``.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         body: dict[str, Any] = {"url": url}
         if events is not None:
             body["events"] = events
-        return self._require_http().post("/v1/webhooks", json=body)
+        return self._require_http().post("/v1/webhooks", json=body, idempotency_key=idempotency_key)
 
     def list(self) -> dict[str, Any]:
         """List all webhook endpoints."""
@@ -47,8 +52,13 @@ class WebhooksResource:
         url: str | None = None,
         events: list[str] | None = None,
         enabled: bool | None = None,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
-        """Update a webhook endpoint."""
+        """Update a webhook endpoint.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         body: dict[str, Any] = {}
         if url is not None:
             body["url"] = url
@@ -56,11 +66,18 @@ class WebhooksResource:
             body["events"] = events
         if enabled is not None:
             body["enabled"] = enabled
-        return self._require_http().patch(f"/v1/webhooks/{endpoint_id}", json=body)
+        return self._require_http().patch(
+            f"/v1/webhooks/{endpoint_id}", json=body,
+            idempotency_key=idempotency_key,
+        )
 
-    def delete(self, endpoint_id: str) -> dict[str, Any]:
-        """Delete a webhook endpoint."""
-        return self._require_http().delete(f"/v1/webhooks/{endpoint_id}")
+    def delete(self, endpoint_id: str, *, idempotency_key: str | None = None) -> dict[str, Any]:
+        """Delete a webhook endpoint.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._require_http().delete(f"/v1/webhooks/{endpoint_id}", idempotency_key=idempotency_key)
 
     def list_deliveries(self, endpoint_id: str) -> dict[str, Any]:
         """List deliveries for a webhook endpoint."""

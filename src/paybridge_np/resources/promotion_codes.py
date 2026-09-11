@@ -16,9 +16,21 @@ class PromotionCodesResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: CreatePromotionCodeParams) -> dict[str, Any]:
-        """Create a customer-facing promotion code that redeems a coupon."""
-        return self._http.post("/v1/billing/promotion-codes", json=params)
+    def create(
+        self,
+        params: CreatePromotionCodeParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Create a customer-facing promotion code that redeems a coupon.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post(
+            "/v1/billing/promotion-codes", json=params,
+            idempotency_key=idempotency_key,
+        )
 
     def list(
         self,
@@ -42,12 +54,34 @@ class PromotionCodesResource:
         """Retrieve a promotion code by ID."""
         return self._http.get(f"/v1/billing/promotion-codes/{promotion_code_id}")
 
-    def deactivate(self, promotion_code_id: str) -> dict[str, Any]:
-        """Deactivate a promotion code. Existing redemptions remain valid."""
+    def deactivate(
+        self,
+        promotion_code_id: str,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Deactivate a promotion code. Existing redemptions remain valid.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.patch(
-            f"/v1/billing/promotion-codes/{promotion_code_id}", json={"active": False}
+            f"/v1/billing/promotion-codes/{promotion_code_id}", json={"active": False},
+            idempotency_key=idempotency_key,
         )
 
-    def validate(self, params: ValidatePromotionCodeParams) -> dict[str, Any]:
-        """Validate a code and preview the discount. Read-only — does NOT redeem."""
-        return self._http.post("/v1/billing/promotion-codes/validate", json=params)
+    def validate(
+        self,
+        params: ValidatePromotionCodeParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Validate a code and preview the discount. Read-only — does NOT redeem.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post(
+            "/v1/billing/promotion-codes/validate", json=params,
+            idempotency_key=idempotency_key,
+        )

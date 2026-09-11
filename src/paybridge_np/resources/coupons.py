@@ -13,13 +13,21 @@ class CouponsResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: CreateCouponParams) -> dict[str, Any]:
+    def create(
+        self,
+        params: CreateCouponParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
         """Create a reusable discount coupon.
 
         Discount params (type, percent/amount off) are immutable post-creation.
         To change terms, deactivate and create a new coupon.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
-        return self._http.post("/v1/billing/coupons", json=params)
+        return self._http.post("/v1/billing/coupons", json=params, idempotency_key=idempotency_key)
 
     def list(
         self,
@@ -40,6 +48,10 @@ class CouponsResource:
         """Retrieve a coupon by ID."""
         return self._http.get(f"/v1/billing/coupons/{coupon_id}")
 
-    def deactivate(self, coupon_id: str) -> dict[str, Any]:
-        """Deactivate a coupon (soft-delete)."""
-        return self._http.delete(f"/v1/billing/coupons/{coupon_id}")
+    def deactivate(self, coupon_id: str, *, idempotency_key: str | None = None) -> dict[str, Any]:
+        """Deactivate a coupon (soft-delete).
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.delete(f"/v1/billing/coupons/{coupon_id}", idempotency_key=idempotency_key)

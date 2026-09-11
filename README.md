@@ -146,6 +146,30 @@ invoices = client.invoices.list(customer_id=customer["id"])
 
 Use a test-mode API key (`sk_test_...`) to test without real money. Mode is determined server-side by the key prefix (`sk_test_` vs `sk_live_`) - there is nothing to configure in the SDK.
 
+## Retries and idempotency (3.3.0)
+
+Only GET requests are automatically retried after connection errors or HTTP
+500/502/503/504 responses, up to `max_retries` times (default: 2). Set
+`max_retries=0` to disable retries. POST, PATCH, and DELETE requests are sent once,
+even when a caller supplies an idempotency key.
+
+Every POST, PATCH, and DELETE sends an `Idempotency-Key` header. By default it is
+a fresh UUID for each method call. All resource methods using these verbs accept
+an optional keyword-only `idempotency_key`:
+
+```python
+refund = client.refunds.create(
+    {"paymentId": "pay_123", "amount": 10000, "reason": "customer_request"},
+    idempotency_key="refund-order-123",
+)
+```
+
+Persist a key per business operation and reuse it with the same request when
+retrying manually. A new method call without a supplied key generates a new UUID;
+it does not reuse the previous call's key. Replay protection is endpoint-specific:
+sending a key does not guarantee deduplication on every route. If a write fails
+with an unknown outcome, check its status before retrying.
+
 ## Error handling
 
 ```python

@@ -22,6 +22,10 @@ from .resources.payment_links import PaymentLinksResource
 class PayBridgeNP:
     """PayBridgeNP API client.
 
+    ``max_retries`` applies only to GET requests (default: 2). Write methods
+    are sent once and accept a keyword-only ``idempotency_key``. When omitted,
+    a new UUID is sent for each call; replay protection depends on the endpoint.
+
     Usage::
 
         from paybridge_np import PayBridgeNP

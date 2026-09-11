@@ -1,10 +1,11 @@
-"""HTTP client with retries and exponential backoff."""
+"""HTTP client with GET-only retries and per-request idempotency keys."""
 
 from __future__ import annotations
 
 import random
 import time
 from typing import Any
+from uuid import uuid4
 
 import httpx
 
@@ -39,18 +40,37 @@ class HttpClient:
             headers={
                 "Authorization": f"Bearer {self._api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": "PayBridgeNP-Python/3.2.1",
+                "User-Agent": "PayBridgeNP-Python/3.3.0",
             },
         )
 
-    def request(self, method: str, path: str, json: Any = None) -> Any:
+    def request(
+        self,
+        method: str,
+        path: str,
+        json: Any = None,
+        *,
+        idempotency_key: str | None = None,
+    ) -> Any:
+        """Retry only GETs; send a caller key or fresh UUID on write requests.
+
+        Replay protection depends on the endpoint. A key does not make it safe
+        to automatically retry a write whose result is unknown.
+        """
+        method = method.upper()
+        is_safe = method == "GET"
+        headers = {}
+        if method in {"POST", "PATCH", "DELETE"}:
+            headers["Idempotency-Key"] = (
+                idempotency_key if idempotency_key is not None else str(uuid4())
+            )
         attempt = 0
         while True:
             attempt += 1
             try:
-                resp = self._client.request(method, path, json=json)
+                resp = self._client.request(method, path, json=json, headers=headers)
             except httpx.HTTPError as exc:
-                if attempt > self._max_retries:
+                if not is_safe or attempt > self._max_retries:
                     raise ConnectionError(str(exc)) from exc
                 time.sleep(_backoff(attempt))
                 continue
@@ -58,7 +78,7 @@ class HttpClient:
             if resp.is_success:
                 return resp.json()
 
-            if resp.status_code in RETRY_STATUSES and attempt <= self._max_retries:
+            if is_safe and resp.status_code in RETRY_STATUSES and attempt <= self._max_retries:
                 retry_after = resp.headers.get("Retry-After")
                 delay = float(retry_after) if retry_after else _backoff(attempt)
                 time.sleep(delay)
@@ -78,14 +98,14 @@ class HttpClient:
     def get(self, path: str) -> Any:
         return self.request("GET", path)
 
-    def post(self, path: str, json: Any) -> Any:
-        return self.request("POST", path, json=json)
+    def post(self, path: str, json: Any, *, idempotency_key: str | None = None) -> Any:
+        return self.request("POST", path, json=json, idempotency_key=idempotency_key)
 
-    def patch(self, path: str, json: Any) -> Any:
-        return self.request("PATCH", path, json=json)
+    def patch(self, path: str, json: Any, *, idempotency_key: str | None = None) -> Any:
+        return self.request("PATCH", path, json=json, idempotency_key=idempotency_key)
 
-    def delete(self, path: str) -> Any:
-        return self.request("DELETE", path)
+    def delete(self, path: str, *, idempotency_key: str | None = None) -> Any:
+        return self.request("DELETE", path, idempotency_key=idempotency_key)
 
     def close(self) -> None:
         self._client.close()

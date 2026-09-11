@@ -13,9 +13,18 @@ class CustomersResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: CreateCustomerParams) -> dict[str, Any]:
-        """Create a customer."""
-        return self._http.post("/v1/billing/customers", json=params)
+    def create(
+        self,
+        params: CreateCustomerParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Create a customer.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post("/v1/billing/customers", json=params, idempotency_key=idempotency_key)
 
     def list(
         self,
@@ -39,21 +48,51 @@ class CustomersResource:
         """Retrieve a customer by ID."""
         return self._http.get(f"/v1/billing/customers/{customer_id}")
 
-    def update(self, customer_id: str, params: UpdateCustomerParams) -> dict[str, Any]:
-        """Update a customer."""
-        return self._http.patch(f"/v1/billing/customers/{customer_id}", json=params)
+    def update(
+        self,
+        customer_id: str,
+        params: UpdateCustomerParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Update a customer.
 
-    def delete(self, customer_id: str) -> dict[str, Any]:
-        """Delete a customer. Returns ``{"deleted": true}``."""
-        return self._http.delete(f"/v1/billing/customers/{customer_id}")
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.patch(
+            f"/v1/billing/customers/{customer_id}", json=params,
+            idempotency_key=idempotency_key,
+        )
 
-    def add_credit(self, customer_id: str, amount: int, note: str | None = None) -> dict[str, Any]:
+    def delete(self, customer_id: str, *, idempotency_key: str | None = None) -> dict[str, Any]:
+        """Delete a customer. Returns ``{"deleted": true}``.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.delete(f"/v1/billing/customers/{customer_id}", idempotency_key=idempotency_key)
+
+    def add_credit(
+        self,
+        customer_id: str,
+        amount: int,
+        note: str | None = None,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
         """Add credits to a customer's balance (use negative amount to deduct).
 
         Credits are applied automatically against future invoices before payment.
         ``amount`` is in paisa (NPR × 100).
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
         body: dict[str, Any] = {"amount": amount}
         if note is not None:
             body["note"] = note
-        return self._http.post(f"/v1/billing/customers/{customer_id}/credit", json=body)
+        return self._http.post(
+            f"/v1/billing/customers/{customer_id}/credit", json=body,
+            idempotency_key=idempotency_key,
+        )

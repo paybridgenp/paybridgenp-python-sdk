@@ -19,6 +19,15 @@ class TaxResource:
         """Get the current tax settings."""
         return self._http.get("/v1/billing/settings/tax")
 
-    def update_settings(self, params: "UpdateTaxSettingsParams") -> dict[str, Any]:
-        """Update tax settings (enabled, rateBps, registrationNumber, label)."""
-        return self._http.patch("/v1/billing/settings/tax", json=params)
+    def update_settings(
+        self,
+        params: "UpdateTaxSettingsParams",
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Update tax settings (enabled, rateBps, registrationNumber, label).
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.patch("/v1/billing/settings/tax", json=params, idempotency_key=idempotency_key)

@@ -14,7 +14,12 @@ class CheckoutResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: CreateCheckoutParams) -> CheckoutSession:
+    def create(
+        self,
+        params: CreateCheckoutParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> CheckoutSession:
         """Create a checkout session.
 
         Args:
@@ -22,10 +27,13 @@ class CheckoutResource:
 
         Returns:
             CheckoutSession with ``id`` and ``checkout_url``.
-        """
-        return self._http.post("/v1/checkout", json=params)
 
-    def expire(self, id: str) -> ExpiredCheckoutSession:
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post("/v1/checkout", json=params, idempotency_key=idempotency_key)
+
+    def expire(self, id: str, *, idempotency_key: str | None = None) -> ExpiredCheckoutSession:
         """Expire a checkout session so it can no longer accept payment.
 
         Use this when you mint a fresh checkout session for a logical
@@ -44,8 +52,14 @@ class CheckoutResource:
 
         Returns:
             ExpiredCheckoutSession with ``status`` reflecting the current state.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
-        return self._http.post(f"/v1/checkout/{quote(id, safe='')}/expire", json={})
+        return self._http.post(
+            f"/v1/checkout/{quote(id, safe='')}/expire", json={},
+            idempotency_key=idempotency_key,
+        )
 
     def retrieve(self, id: str) -> dict[str, Any]:
         """Retrieve a checkout session by ID.

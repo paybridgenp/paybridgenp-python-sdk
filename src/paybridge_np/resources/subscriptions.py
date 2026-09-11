@@ -20,9 +20,18 @@ class SubscriptionsResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: CreateSubscriptionParams) -> dict[str, Any]:
-        """Create a subscription."""
-        return self._http.post("/v1/billing/subscriptions", json=params)
+    def create(
+        self,
+        params: CreateSubscriptionParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Create a subscription.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post("/v1/billing/subscriptions", json=params, idempotency_key=idempotency_key)
 
     def list(
         self,
@@ -53,41 +62,77 @@ class SubscriptionsResource:
         return self._http.get(f"/v1/billing/subscriptions/{subscription_id}")
 
     def pause(
-        self, subscription_id: str, params: PauseSubscriptionParams | None = None
+        self,
+        subscription_id: str,
+        params: PauseSubscriptionParams | None = None,
+        *,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
-        """Pause a subscription."""
+        """Pause a subscription.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.post(
             f"/v1/billing/subscriptions/{subscription_id}/pause",
             json=params or {},
+            idempotency_key=idempotency_key,
         )
 
-    def resume(self, subscription_id: str) -> dict[str, Any]:
-        """Resume a paused subscription."""
+    def resume(
+        self,
+        subscription_id: str,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Resume a paused subscription.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.post(
-            f"/v1/billing/subscriptions/{subscription_id}/resume", json={}
+            f"/v1/billing/subscriptions/{subscription_id}/resume", json={},
+            idempotency_key=idempotency_key,
         )
 
     def cancel(
-        self, subscription_id: str, params: CancelSubscriptionParams | None = None
+        self,
+        subscription_id: str,
+        params: CancelSubscriptionParams | None = None,
+        *,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
-        """Cancel a subscription."""
+        """Cancel a subscription.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.post(
             f"/v1/billing/subscriptions/{subscription_id}/cancel",
             json=params or {},
+            idempotency_key=idempotency_key,
         )
 
     def change_plan(
-        self, subscription_id: str, params: ChangePlanParams
+        self,
+        subscription_id: str,
+        params: ChangePlanParams,
+        *,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
         """Change the plan on a subscription.
 
         Pass ``prorationBehavior="create_prorations"`` to apply immediately and
         generate a proration invoice for the net difference. Default (``"none"``)
         schedules the change for the next billing cycle.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
         return self._http.post(
             f"/v1/billing/subscriptions/{subscription_id}/change-plan",
             json=params,
+            idempotency_key=idempotency_key,
         )
 
     def preview_proration(
@@ -104,56 +149,105 @@ class SubscriptionsResource:
             f"/v1/billing/subscriptions/{subscription_id}/preview-proration?{qs}"
         )
 
-    def end_trial(self, subscription_id: str) -> dict[str, Any]:
+    def end_trial(
+        self,
+        subscription_id: str,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
         """End a subscription's trial immediately.
 
         Generates the first paid invoice and emails it to the customer.
         Fires ``subscription.trial_ended`` webhook. Returns
         ``{ "subscription": {...}, "invoice": {...} }``.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
         return self._http.post(
-            f"/v1/billing/subscriptions/{subscription_id}/end-trial", json={}
+            f"/v1/billing/subscriptions/{subscription_id}/end-trial", json={},
+            idempotency_key=idempotency_key,
         )
 
     def extend_trial(
-        self, subscription_id: str, params: ExtendTrialParams
+        self,
+        subscription_id: str,
+        params: ExtendTrialParams,
+        *,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
         """Push a subscription's trial end into the future.
 
         Only valid while the trial is still active. Re-arms the 3-day-before
         reminder. Fires ``subscription.trial_extended`` webhook.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
         return self._http.post(
             f"/v1/billing/subscriptions/{subscription_id}/extend-trial",
             json=params,
+            idempotency_key=idempotency_key,
         )
 
     def apply_coupon(
-        self, subscription_id: str, params: ApplyCouponParams
+        self,
+        subscription_id: str,
+        params: ApplyCouponParams,
+        *,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
         """Attach a coupon or promotion code to a subscription.
 
         Takes effect on the next invoice. Deactivates any prior active
         discount on this sub. Pass either ``couponId`` or ``promotionCode``.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
         return self._http.post(
             f"/v1/billing/subscriptions/{subscription_id}/apply-coupon",
             json=params,
+            idempotency_key=idempotency_key,
         )
 
-    def remove_discount(self, subscription_id: str) -> dict[str, Any]:
-        """Remove the currently active discount. Future invoices un-discounted."""
+    def remove_discount(
+        self,
+        subscription_id: str,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Remove the currently active discount. Future invoices un-discounted.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.delete(
-            f"/v1/billing/subscriptions/{subscription_id}/discount"
+            f"/v1/billing/subscriptions/{subscription_id}/discount",
+            idempotency_key=idempotency_key,
         )
 
     # ── Usage (metered billing) ───────────────────────────────────────────────
 
-    def report_usage(self, subscription_id: str, params: dict[str, Any]) -> dict[str, Any]:
-        """Report a usage event. action='increment' (default) or 'set'. Pass idempotency_key to prevent double-counting."""
+    def report_usage(
+        self,
+        subscription_id: str,
+        params: dict[str, Any],
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Report a usage event. action='increment' (default) or 'set'.
+
+        Use ``params['idempotency_key']`` for usage-event deduplication.
+        That body field is separate from the optional request-header key.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.post(
             f"/v1/billing/subscriptions/{subscription_id}/usage",
             json=params,
+            idempotency_key=idempotency_key,
         )
 
     def get_usage_summary(self, subscription_id: str) -> dict[str, Any]:
@@ -177,22 +271,55 @@ class SubscriptionsResource:
             f"/v1/billing/subscriptions/{subscription_id}/invoice-items"
         )
 
-    def create_invoice_item(self, subscription_id: str, params: dict[str, Any]) -> dict[str, Any]:
-        """Add a one-off charge consumed on the next invoice."""
+    def create_invoice_item(
+        self,
+        subscription_id: str,
+        params: dict[str, Any],
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Add a one-off charge consumed on the next invoice.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.post(
             f"/v1/billing/subscriptions/{subscription_id}/invoice-items",
             json=params,
+            idempotency_key=idempotency_key,
         )
 
-    def delete_invoice_item(self, subscription_id: str, item_id: str) -> dict[str, Any]:
-        """Delete a pending invoice item before it is invoiced."""
+    def delete_invoice_item(
+        self,
+        subscription_id: str,
+        item_id: str,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Delete a pending invoice item before it is invoiced.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.delete(
-            f"/v1/billing/subscriptions/{subscription_id}/invoice-items/{item_id}"
+            f"/v1/billing/subscriptions/{subscription_id}/invoice-items/{item_id}",
+            idempotency_key=idempotency_key,
         )
 
-    def update_quantity(self, subscription_id: str, quantity: int) -> dict[str, Any]:
-        """Update the per-seat quantity on an active per_unit subscription."""
+    def update_quantity(
+        self,
+        subscription_id: str,
+        quantity: int,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Update the per-seat quantity on an active per_unit subscription.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
         return self._http.patch(
             f"/v1/billing/subscriptions/{subscription_id}/quantity",
             json={"quantity": quantity},
+            idempotency_key=idempotency_key,
         )

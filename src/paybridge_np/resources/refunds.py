@@ -13,13 +13,21 @@ class RefundsResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(self, params: CreateRefundParams) -> dict[str, Any]:
+    def create(
+        self,
+        params: CreateRefundParams,
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
         """Create a refund.
 
         Args:
             params: Must include ``payment_id``, ``amount``, and ``reason``.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
-        return self._http.post("/v1/refunds", json=params)
+        return self._http.post("/v1/refunds", json=params, idempotency_key=idempotency_key)
 
     def list(
         self,

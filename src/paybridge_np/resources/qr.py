@@ -13,7 +13,12 @@ class QrResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def fonepay(self, params: dict[str, Any]) -> dict[str, Any]:
+    def fonepay(
+        self,
+        params: dict[str, Any],
+        *,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
         """Create a Fonepay Direct-QR session.
 
         Returns the raw EMV QR string, a base64-encoded PNG image, and a
@@ -32,10 +37,13 @@ class QrResource:
 
         Returns:
             dict with id, qr_message, qr_image (data URL), events_url, expires_at.
-        """
-        return self._http.post("/v1/qr/fonepay", json=params)
 
-    def refresh(self, id: str) -> dict[str, Any]:
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
+        """
+        return self._http.post("/v1/qr/fonepay", json=params, idempotency_key=idempotency_key)
+
+    def refresh(self, id: str, *, idempotency_key: str | None = None) -> dict[str, Any]:
         """Refresh a Direct-QR session: regenerate a fresh Fonepay QR for the
         SAME session (same ``id``, ``events_url``, and webhook) without
         spawning a new session.
@@ -53,5 +61,11 @@ class QrResource:
 
         Returns:
             dict with id, qr_message, qr_image (data URL), events_url, expires_at.
+
+        ``idempotency_key`` sets the request header; omitted keys default to a new UUID.
+        Replay protection depends on the endpoint; writes are never auto-retried.
         """
-        return self._http.post(f"/v1/qr/{quote(id, safe='')}/refresh", json={})
+        return self._http.post(
+            f"/v1/qr/{quote(id, safe='')}/refresh", json={},
+            idempotency_key=idempotency_key,
+        )
