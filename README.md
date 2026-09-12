@@ -183,6 +183,10 @@ except PayBridgeError as e:
     print(e, e.status_code)
 ```
 
+Errors carry a `type` (which names the class) and an optional `code` (a machine
+string from the API, often `None`). A 404 raises `NotFoundError`, which subclasses
+`InvalidRequestError` — catch either.
+
 ## Context manager
 
 ```python

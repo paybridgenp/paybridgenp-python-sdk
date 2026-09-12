@@ -116,10 +116,14 @@ class InvalidRequestError(PayBridgeError):
 
 
 class NotFoundError(InvalidRequestError):
-    """Pre-1.0 alias. 404 is now an ``InvalidRequestError`` (Stripe convention).
+    """404. A subclass of ``InvalidRequestError`` (Stripe convention).
 
-    Kept as a subclass so ``except NotFoundError`` keeps working. Prefer
-    ``except InvalidRequestError`` and check ``e.status_code == 404``.
+    404s are returned as this class, so pre-1.0 ``except NotFoundError`` keeps
+    working and ``except InvalidRequestError`` catches it too. Subclassing alone
+    would not have done that: until 2026-09-12 the parser returned the parent
+    class, so every ``except NotFoundError`` written against 0.x silently stopped
+    catching anything. Prefer ``except InvalidRequestError`` with a
+    ``e.status_code == 404`` check in new code.
     """
 
     def __init__(
@@ -211,6 +215,8 @@ def parse_error_response(
     if type_ == "permission_error":
         return PermissionError(message, status_code, code, request_id, body)
     if type_ == "invalid_request_error":
+        if status_code == 404:
+            return NotFoundError(message, code, request_id, body)
         return InvalidRequestError(message, status_code, code, request_id, body)
     if type_ == "idempotency_error":
         return IdempotencyError(message, code, request_id, body)
@@ -229,6 +235,8 @@ def parse_error_response(
         if status_code == 429:
             retry_after = int(retry_after_header) if retry_after_header else None
             return RateLimitError(message, code, request_id, body, retry_after)
+        if status_code == 404:
+            return NotFoundError(message, code, request_id, body)
         return InvalidRequestError(message, status_code, code, request_id, body)
     return ApiError(message, status_code, code, request_id, body)
 
