@@ -47,8 +47,7 @@ class PromotionCodesResource:
             qs_parts["active"] = str(active).lower()
         if limit is not None:
             qs_parts["limit"] = str(limit)
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/billing/promotion-codes{'?' + qs if qs else ''}")
+        return self._http.get("/v1/billing/promotion-codes", params=qs_parts or None)
 
     def get(self, promotion_code_id: str) -> dict[str, Any]:
         """Retrieve a promotion code by ID."""

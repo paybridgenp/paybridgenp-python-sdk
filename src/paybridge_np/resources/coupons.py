@@ -41,8 +41,7 @@ class CouponsResource:
             qs_parts["active"] = str(active).lower()
         if limit is not None:
             qs_parts["limit"] = str(limit)
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/billing/coupons{'?' + qs if qs else ''}")
+        return self._http.get("/v1/billing/coupons", params=qs_parts or None)
 
     def get(self, coupon_id: str) -> dict[str, Any]:
         """Retrieve a coupon by ID."""

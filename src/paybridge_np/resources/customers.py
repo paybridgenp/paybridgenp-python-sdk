@@ -41,8 +41,7 @@ class CustomersResource:
             qs_parts["limit"] = str(limit)
         if search is not None:
             qs_parts["search"] = search
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/billing/customers{'?' + qs if qs else ''}")
+        return self._http.get("/v1/billing/customers", params=qs_parts or None)
 
     def get(self, customer_id: str) -> dict[str, Any]:
         """Retrieve a customer by ID."""

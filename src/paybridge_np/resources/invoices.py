@@ -37,8 +37,7 @@ class InvoicesResource:
             qs_parts["subscriptionId"] = subscription_id
         if search is not None:
             qs_parts["search"] = search
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/billing/invoices{'?' + qs if qs else ''}")
+        return self._http.get("/v1/billing/invoices", params=qs_parts or None)
 
     def get(self, invoice_id: str) -> dict[str, Any]:
         """Retrieve an invoice by ID."""

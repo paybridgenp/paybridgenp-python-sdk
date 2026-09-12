@@ -57,8 +57,7 @@ class PaymentLinksResource:
         if active is not None:
             # API expects the literal strings "true"/"false".
             qs_parts["active"] = "true" if active else "false"
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/payment-links{'?' + qs if qs else ''}")
+        return self._http.get("/v1/payment-links", params=qs_parts or None)
 
     def retrieve(self, id: str) -> dict[str, Any]:
         """Retrieve a single link by ID, including aggregated view/conversion stats."""

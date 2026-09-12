@@ -221,3 +221,30 @@ def test_get_forwards_query_params(monkeypatch):
     monkeypatch.setattr(client._client, "request", fake_request)
     assert client.get("/v1/things", params={"limit": 5}) == {"ok": True}
     assert seen == {"method": "GET", "path": "/v1/things", "params": {"limit": 5}}
+
+
+def test_list_filters_are_percent_encoded(transport):
+    """Before 2026-09-12 list filters were pasted raw into the URL, so a value
+    containing & or # silently became extra parameters or was truncated."""
+    client, requests, _outcomes, _sleeps = transport
+    client.customers.list(search="A&B + C#D", limit=5)
+    url = requests[-1].url
+    assert url.params["search"] == "A&B + C#D"
+    assert url.params["limit"] == "5"
+    assert len(url.params) == 2
+    # The raw query must carry the escapes, not the literal separators.
+    query = url.query.decode()
+    assert "%26" in query and "%23" in query
+
+
+def test_list_usage_records_sends_its_query(transport):
+    """The public caller, not just the HttpClient helper."""
+    client, requests, _outcomes, _sleeps = transport
+    client.subscriptions.list_usage_records("sub_123", limit=7)
+    assert requests[-1].url.params["limit"] == "7"
+
+
+def test_list_without_filters_sends_no_query(transport):
+    client, requests, _outcomes, _sleeps = transport
+    client.customers.list()
+    assert requests[-1].url.query == b""

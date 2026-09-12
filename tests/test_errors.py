@@ -78,3 +78,25 @@ def test_error_to_dict():
     assert d["code"] is None
     assert d["status_code"] == 401
     assert d["raw"]["detail"] == "invalid"
+
+
+def test_explicit_type_wins_over_status():
+    """A 404 typed permission_error is a PermissionError, not a NotFoundError."""
+    from paybridge_np.errors import PermissionError as PbPermissionError
+
+    err = parse_error_response(404, {"error": {"message": "no", "type": "permission_error"}})
+    assert isinstance(err, PbPermissionError)
+    assert not isinstance(err, NotFoundError)
+
+
+def test_unknown_type_falls_back_to_status():
+    err = parse_error_response(404, {"error": {"message": "no", "type": "brand_new_error"}})
+    assert isinstance(err, NotFoundError)
+
+
+def test_metadata_survives_parsing():
+    body = {"error": {"message": "no", "type": "invalid_request_error", "code": "resource_missing", "request_id": "req_1"}}
+    err = parse_error_response(404, body)
+    assert err.request_id == "req_1"
+    assert err.raw is body
+    assert err.to_dict()["name"] == "NotFoundError"

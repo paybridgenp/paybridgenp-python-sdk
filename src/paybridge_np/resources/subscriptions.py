@@ -54,8 +54,7 @@ class SubscriptionsResource:
             qs_parts["customerId"] = customer_id
         if plan_id is not None:
             qs_parts["planId"] = plan_id
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/billing/subscriptions{'?' + qs if qs else ''}")
+        return self._http.get("/v1/billing/subscriptions", params=qs_parts or None)
 
     def get(self, subscription_id: str) -> dict[str, Any]:
         """Retrieve a subscription by ID."""

@@ -41,8 +41,7 @@ class PlansResource:
             qs_parts["limit"] = str(limit)
         if active is not None:
             qs_parts["active"] = str(active).lower()
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/billing/plans{'?' + qs if qs else ''}")
+        return self._http.get("/v1/billing/plans", params=qs_parts or None)
 
     def get(self, plan_id: str) -> dict[str, Any]:
         """Retrieve a plan by ID."""

@@ -23,8 +23,7 @@ class PaymentsResource:
             params["limit"] = str(limit)
         if offset is not None:
             params["offset"] = str(offset)
-        qs = "&".join(f"{k}={v}" for k, v in params.items())
-        return self._http.get(f"/v1/payments{'?' + qs if qs else ''}")
+        return self._http.get("/v1/payments", params=params or None)
 
     def retrieve(self, payment_id: str) -> dict[str, Any]:
         """Retrieve a single payment by ID."""

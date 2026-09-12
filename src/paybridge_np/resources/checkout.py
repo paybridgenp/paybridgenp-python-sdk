@@ -101,5 +101,4 @@ class CheckoutResource:
             qs_parts["offset"] = str(offset)
         if status is not None:
             qs_parts["status"] = status
-        qs = "&".join(f"{k}={quote(v, safe='')}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/sessions{'?' + qs if qs else ''}")
+        return self._http.get("/v1/sessions", params=qs_parts or None)

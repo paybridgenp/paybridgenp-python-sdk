@@ -170,6 +170,16 @@ it does not reuse the previous call's key. Replay protection is endpoint-specifi
 sending a key does not guarantee deduplication on every route. If a write fails
 with an unknown outcome, check its status before retrying.
 
+## Changed in 3.3.0
+
+- Writes are no longer retried automatically, and every write sends an
+  `Idempotency-Key` (see above).
+- List filters are percent-encoded by the transport. A `search` value containing
+  `&`, `#` or a space used to be pasted into the URL raw, which split it into
+  extra parameters or truncated it at the `#`.
+- A 404 raises `NotFoundError` again, so `except NotFoundError` branches written
+  against 0.x start running (see Error handling).
+
 ## Error handling
 
 ```python
@@ -184,8 +194,14 @@ except PayBridgeError as e:
 ```
 
 Errors carry a `type` (which names the class) and an optional `code` (a machine
-string from the API, often `None`). A 404 raises `NotFoundError`, which subclasses
-`InvalidRequestError` — catch either.
+string from the API, often `None`). The `type` wins: a 404 typed
+`permission_error` raises `PermissionError`. An ordinary 404 — typed
+`invalid_request_error`, or untyped — raises `NotFoundError`, which subclasses
+`InvalidRequestError`, so either `except` catches it.
+
+Changed in 3.3.0: 404s used to be parsed as plain `InvalidRequestError`, so an
+`except NotFoundError` branch written against 0.x caught nothing. Such branches
+run again. If you have both, order them `NotFoundError` first.
 
 ## Context manager
 

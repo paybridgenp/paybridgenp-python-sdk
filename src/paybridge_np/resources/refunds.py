@@ -44,8 +44,7 @@ class RefundsResource:
             qs_parts["limit"] = str(limit)
         if offset is not None:
             qs_parts["offset"] = str(offset)
-        qs = "&".join(f"{k}={v}" for k, v in qs_parts.items())
-        return self._http.get(f"/v1/refunds{'?' + qs if qs else ''}")
+        return self._http.get("/v1/refunds", params=qs_parts or None)
 
     def retrieve(self, refund_id: str) -> dict[str, Any]:
         """Retrieve a single refund by ID."""
