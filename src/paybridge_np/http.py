@@ -51,6 +51,7 @@ class HttpClient:
         json: Any = None,
         *,
         idempotency_key: str | None = None,
+        params: dict[str, Any] | None = None,
     ) -> Any:
         """Retry only GETs; send a caller key or fresh UUID on write requests.
 
@@ -68,7 +69,7 @@ class HttpClient:
         while True:
             attempt += 1
             try:
-                resp = self._client.request(method, path, json=json, headers=headers)
+                resp = self._client.request(method, path, json=json, headers=headers, params=params)
             except httpx.HTTPError as exc:
                 if not is_safe or attempt > self._max_retries:
                     raise ConnectionError(str(exc)) from exc
@@ -95,8 +96,8 @@ class HttpClient:
                 resp.status_code, raw, resp.headers.get("Retry-After")
             )
 
-    def get(self, path: str) -> Any:
-        return self.request("GET", path)
+    def get(self, path: str, *, params: dict[str, Any] | None = None) -> Any:
+        return self.request("GET", path, params=params)
 
     def post(self, path: str, json: Any, *, idempotency_key: str | None = None) -> Any:
         return self.request("POST", path, json=json, idempotency_key=idempotency_key)

@@ -196,3 +196,28 @@ def test_optional_action_body_stays_optional(transport, operation):
     getattr(client.subscriptions, operation)("sub_1", idempotency_key="request-123")
     assert json.loads(requests[0].content) == {}
     assert requests[0].headers["Idempotency-Key"] == "request-123"
+
+
+def test_get_forwards_query_params(monkeypatch):
+    """subscriptions.list_usage_records passed params= to get(), which 3.2.x rejected."""
+    from paybridge_np.http import HttpClient
+
+    seen = {}
+
+    class FakeResponse:
+        is_success = True
+        status_code = 200
+        headers = {}
+
+        def json(self):
+            return {"ok": True}
+
+    client = HttpClient(api_key="sk_test_x", base_url="https://example.test")
+
+    def fake_request(method, path, json=None, headers=None, params=None):
+        seen.update({"method": method, "path": path, "params": params})
+        return FakeResponse()
+
+    monkeypatch.setattr(client._client, "request", fake_request)
+    assert client.get("/v1/things", params={"limit": 5}) == {"ok": True}
+    assert seen == {"method": "GET", "path": "/v1/things", "params": {"limit": 5}}
